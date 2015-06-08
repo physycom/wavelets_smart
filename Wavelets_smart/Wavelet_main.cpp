@@ -16,16 +16,16 @@
 using namespace std;
 
 
-vector<double> v_tempo, v_i, v_m, v_s, v_t, v_v, v_medio;
-vector<double> d_tempo, di, dm, ds, dt, dv;
-vector<double> w_tempo, w_i, w_m, w_s, w_t, w_v, ws_s;
+vector<double> v_time, v_i, v_m, v_s, v_t, v_v, v_mean;
+vector<double> d_time, di, dm, ds, dt, dv;
+vector<double> w_time, w_i, w_m, w_s, w_t, w_v, ws_s;
 double m_s;
 vector<double> random_, random_w, random_ws;
 
-vector<vector<double>> v_coeff_w_piu;
-vector<vector<double>> v_coeff_w_meno;
-vector<double> varianze_piu;
-vector<double> varianze_meno;
+vector<vector<double>> v_coeff_w_plus;
+vector<vector<double>> v_coeff_w_minus;
+vector<double> variance_plus;
+vector<double> variance_minus;
 
 
 class Randouble {
@@ -45,6 +45,17 @@ double randouble(double low = 0.0, double high = 1.0, unsigned s = chrono::syste
 	return dist(re);
 };
 
+inline double SQR(double d) { return d*d; };
+
+template<typename T>
+double media_v(vector<T> &vec) {
+	int N = vec.size();
+	double ret = 0.;
+	for(T elem : vec) ret += elem;
+	ret /= N;
+	return ret;
+};
+
 template<typename T>
 double varianza(vector<T> &vec) {
 	int N = vec.size();
@@ -57,69 +68,69 @@ double varianza(vector<T> &vec) {
 
 //Daub4 WAVE;
 
-void leggi_random() {
+void read_random() {
 	ifstream ifi_r("random.txt");
 	double r;
 	while(ifi_r >> r)random_.push_back(r);
 }
 
-void wavelet_pass_meno(vector<double> v) {
+void wavelet_pass_minus(vector<double> v) {
 	int size = v.size();
 	if(size <= 2) return;
-	vector<double> pezzo, pezzo2;
+	vector<double> part, part2;
 	for(int i = 0; i < size + 1; i += 2) {
 		double m = (v[i] + v[i + 1]) / 2.; 
 		double d = (v[i] - v[i + 1]) / 2.;
-		pezzo.push_back(m);
-		pezzo2.push_back(d);
+		part.push_back(m);
+		part2.push_back(d);
 	};
-	v_coeff_w_piu.push_back(pezzo);
-	v_coeff_w_meno.push_back(pezzo2);
+	v_coeff_w_plus.push_back(part);
+	v_coeff_w_minus.push_back(part2);
 
-	wavelet_pass_meno(pezzo);
+	wavelet_pass_minus(part);
 };
 
-void calcola_wavelet_meno(vector<double> v, string stringa) {
-	ostringstream ostringa;
-	ostringa << "wavelet_" << stringa << ".txt";
+void calcola_wavelet_minus(vector<double> v, string stringa) {
+	ostringstream ostring;
+	ostring << "wavelet_" << stringa << ".txt";
 	int size = v.size(); 
 	//cout << size << endl; PAU;
 
-	v_coeff_w_piu.clear();
-	v_coeff_w_meno.clear();
-	varianze_piu.clear();
-	varianze_meno.clear();
+	v_coeff_w_plus.clear();
+	v_coeff_w_minus.clear();
+	variance_plus.clear();
+	variance_minus.clear();
 
-	vector<double> primo;
+	vector<double> first;
 	for(int i = 0; i < size + 1; i += 2) {
 		double m = (v[i] + v[i + 1]) / 2.;
-		primo.push_back(m);
+		first.push_back(m);
 	};
 
-	wavelet_pass_meno(primo);
+	wavelet_pass_minus(first);
 
 
-	for(int i = 0; i < v_coeff_w_piu.size(); i++)varianze_piu.push_back(varianza(v_coeff_w_piu[i]));
+	for(size_t i = 0; i < v_coeff_w_plus.size(); i++)variance_plus.push_back(varianza(v_coeff_w_plus[i]));
 
-	for(int i = 0; i < v_coeff_w_meno.size(); i++)varianze_meno.push_back(varianza(v_coeff_w_meno[i]));
+	for(size_t i = 0; i < v_coeff_w_minus.size(); i++)variance_minus.push_back(varianza(v_coeff_w_minus[i]));
 	
-	//ofstream ofi_coeff_p("coeff_piu.txt");
+	//ofstream ofi_coeff_p("coeff_plus.txt");
 
-	//for(int i = 0; i < v_coeff_w_piu.size(); i++) {
-	//	for(int j = 0; j < v_coeff_w_piu[i].size(); j++)ofi_coeff_p << v_coeff_w_piu[i][j] << " ";
+	//for(int i = 0; i < v_coeff_w_plus.size(); i++) {
+	//	for(int j = 0; j < v_coeff_w_plus[i].size(); j++)ofi_coeff_p << v_coeff_w_plus[i][j] << " ";
 	//	ofi_coeff_p << endl;
 	//}
 
-	ostringstream ostringa3;
-	ostringa3 << "wavelet_" << stringa << "coeff.txt";
-	ofstream ofi(ostringa3.str());
-	for(int i = 0; i < varianze_piu.size(); i++)ofi << v_coeff_w_piu[i].size() << "\t" << varianze_piu[i] << "\t" << varianze_meno[i] << endl;
+	ostringstream ostring3;
+	ostring3 << "wavelet_" << stringa << "coeff.txt";
+	ofstream ofi(ostring3.str());
+	for(int i = 0; i < variance_plus.size(); i++)ofi << v_coeff_w_plus[i].size() << "\t" << variance_plus[i] << "\t" << variance_minus[i] << endl;
 	ofi.close();
 
 };
 
-void leggi_smart_s_dati() {
-	ifstream ifi("MS_serial.TXT");
+void read_serial_dati() {
+	ifstream ifi("serial.TXT");
 	double ws;
 	while(ifi.good()) {
 		ifi >> ws;
@@ -128,7 +139,7 @@ void leggi_smart_s_dati() {
 	}
 }
 
-void tolgo_media_da_segnale() {
+void remove_mean_from_signal() {
 	double Med = 0;
 	for(int i = 0; i < v_s.size(); i++) {
 		Med += v_s[i];
@@ -141,14 +152,14 @@ void tolgo_media_da_segnale() {
 
 int main() {
 
-	leggi_smart_s_dati();
-	tolgo_media_da_segnale();
+	read_serial_dati();
+	remove_mean_from_signal();
 
 	ofstream ofi("random.txt");
 	//for(int i = 0; i < 14096; i++)randouble(0, 1.);
 	for(int i = 0; i < v_s.size(); i++)ofi << randouble(-1., 1.) << endl;
 	ofi.close();
-	leggi_random();
+	read_random();
 
 	//double somma = 0;
 	//for(auto v : random) {
@@ -170,9 +181,9 @@ int main() {
 	//cout << somma << endl; //PAU;
 
 
-	calcola_wavelet_meno(v_s,"metas_");
+	calcola_wavelet_minus(v_s,"metas_");
 
-	calcola_wavelet_meno(random_, "random_");
+	calcola_wavelet_minus(random_, "random_");
 
 	return 0;
 }
