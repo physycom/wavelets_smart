@@ -13,6 +13,8 @@
 #include <fstream>
 
 
+#define PAU cin.get();
+
 using namespace std;
 
 
@@ -66,7 +68,6 @@ double varianza(vector<T> &vec) {
 };
 
 
-//Daub4 WAVE;
 
 void read_random() {
 	ifstream ifi_r("random.txt");
@@ -94,7 +95,6 @@ void calcola_wavelet_minus(vector<double> v, string stringa) {
 	ostringstream ostring;
 	ostring << "wavelet_" << stringa << ".txt";
 	int size = v.size(); 
-	//cout << size << endl; PAU;
 
 	v_coeff_w_plus.clear();
 	v_coeff_w_minus.clear();
@@ -124,7 +124,7 @@ void calcola_wavelet_minus(vector<double> v, string stringa) {
 	ostringstream ostring3;
 	ostring3 << "wavelet_" << stringa << "coeff.txt";
 	ofstream ofi(ostring3.str());
-	for(int i = 0; i < variance_plus.size(); i++)ofi << v_coeff_w_plus[i].size() << "\t" << variance_plus[i] << "\t" << variance_minus[i] << endl;
+	for(size_t i = 0; i < variance_plus.size(); i++)ofi << v_coeff_w_plus[i].size() << "\t" << variance_plus[i] << "\t" << variance_minus[i] << endl;
 	ofi.close();
 
 };
@@ -141,7 +141,7 @@ void read_serial_dati() {
 
 void remove_mean_from_signal() {
 	double Med = 0;
-	for(int i = 0; i < v_s.size(); i++) {
+	for(size_t i = 0; i < v_s.size(); i++) {
 		Med += v_s[i];
 	}
 	m_s = Med / double(v_s.size());
@@ -156,8 +156,8 @@ int main() {
 	remove_mean_from_signal();
 
 	ofstream ofi("random.txt");
-	//for(int i = 0; i < 14096; i++)randouble(0, 1.);
-	for(int i = 0; i < v_s.size(); i++)ofi << randouble(-1., 1.) << endl;
+	//for(size_t i = 0; i < 14096; i++)randouble(0, 1.);
+	for(size_t i = 0; i < v_s.size(); i++)ofi << randouble(-1., 1.) << endl;
 	ofi.close();
 	read_random();
 
