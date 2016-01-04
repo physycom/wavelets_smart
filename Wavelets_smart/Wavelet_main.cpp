@@ -1,19 +1,14 @@
-//#include <master.h>
 
 #include <vector>
 
 #include <random>
 #include <chrono>
 
-#include <windows.h>
-
 #include <string>
 #include <sstream>
 
 #include <fstream>
 
-
-#define PAU cin.get();
 
 using namespace std;
 
